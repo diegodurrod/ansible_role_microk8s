@@ -18,12 +18,12 @@
   shell: "uname -r"
   register: uname
 
-- name: Install raspberry specific packages
+- name: Install raspberry or banana specific packages
   package:
     name:
       - linux-modules-extra-raspi
     state: latest
-  when: uname.stdout | regex_search('raspi')
+  when: uname.stdout | regex_search('raspi|BPI')
 
 - name: Install microk8s
   become: yes
