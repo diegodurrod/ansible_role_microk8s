@@ -1,10 +1,10 @@
 ---
 galaxy_info:
   role_name: microk8s
-  namespace: istvano
+  namespace: diegodurrod
   description: Ansible role for installing and set-up microk8s.
-  author: Istvan Orban
-  company: Urban and Co Ltd.
+  author: Diego Durán Rodríguez
+  company: Based on Istvan Orban microk8s role
   license: MIT
   min_ansible_version: 2.7
   platforms:
@@ -12,6 +12,7 @@ galaxy_info:
       versions:
         - xenial
         - bionic
+        - jammy
   galaxy_tags:
     - kubernetes
     - k8s

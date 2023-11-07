@@ -4,12 +4,12 @@
 #
 
 # version management
-microk8s_version: "1.27/stable"
+microk8s_version: "1.28/stable"
 microk8s_disable_snap_autoupdate: false
 
 # plugin configuration
-microk8s_dns_resolvers: 8.8.8.8,8.8.4.4
-registry_size: 20Gi
+microk8s_dns_resolvers: 192.168.11.2,8.8.8.8,8.8.4.4
+registry_size: 30Gi
 microk8s_plugins:
   dns: "{{ microk8s_dns_resolvers }}"     # CoreDNS
   host-access: true                       # Allow Pods connecting to Host services smoothly
@@ -30,7 +30,7 @@ microk8s_plugins:
   knative: false                          # The Knative framework on Kubernetes.
   kubeflow: false                         # Kubeflow for easy ML deployments
   linkerd: false                          # Linkerd is a service mesh for Kubernetes and other frameworks
-  metallb: false                          # Loadbalancer for your Kubernetes cluster
+  metallb: true                           # Loadbalancer for your Kubernetes cluster
   multus: false                           # Multus CNI enables attaching multiple network interfaces to pods
   prometheus: false                       # Prometheus operator for monitoring and logging
   traefik: false                          # another ingress
@@ -39,6 +39,12 @@ microk8s_plugins:
   kata: false                             # A secure container runtime with lightweight virtual machines
   openebs: false                          # openebs storage
   openfaas: false                         # serverless
+  argocd: true                            # The declarative, GitOps continuous delivery tool for Kubernetes.
+  gopaddle-lite: true                     # Simple “no-code” platform for Kubernetes developers.
+  nfs: true                               # Adds NFS-based storage.
+  parking: true                           # Parking for static sites.
+  sosivio: true                           # Predictive troubleshooting for Kubernetes.
+  trivy: true                             # Open source security scanner for Kubernetes
 
 helm3_repositories:
   - name: stable
@@ -48,7 +54,7 @@ helm3_repositories:
 users: []
 
 # enable high-availability?
-microk8s_enable_HA: false
+microk8s_enable_HA: true
 
 # hostgroup whose members will form high-availability cluster
 microk8s_group_HA: "microk8s_HA"
@@ -60,7 +66,7 @@ microk8s_ip_regex_HA: "([0-9]{1,3}[\\.]){3}[0-9]{1,3}"
 microk8s_group_WORKERS: "microk8s_WORKERS"
 
 # option to add workers hostgroup memembers to hostfile
-add_workers_to_hostfile: false
+add_workers_to_hostfile: true
 
 # for setting up custom certificate request.  Set to template name to enable
 #microk8s_csr_template: null

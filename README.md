@@ -38,7 +38,7 @@ defined in `[defaults/main.yml](defaults/main.yml)`.
 ```yaml
 - hosts: servers
   roles:
-    - role: istvano.microk8s
+    - role: diegodurrod.microk8s
       vars:
         microk8s_plugins:
           dns: "1.1.1.1"
