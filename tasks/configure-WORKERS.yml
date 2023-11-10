@@ -2,7 +2,7 @@
 
 - name: Find the designated host
   set_fact:
-    designated_host: '{{ (groups[microk8s_group_HA]|sort)[0] }}'
+    designated_host: '{{ (groups[microk8s_group_INTERNALNODES]|sort)[0] }}'
 
 - block:
   - name: Waiting for microk8s to be ready on microk8s host master

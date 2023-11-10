@@ -1,5 +1,18 @@
 ---
 
+# when: "groups[microk8s_group_WORKERS] is defined and groups[microk8s_group_WORKERS]|length>0"
+#microk8s_group_INTERNALNODES
+- name: Enumerate all cluster HA hosts within the hosts file if internal nodes are defined
+  become: yes
+  blockinfile:
+    dest: /etc/hosts
+    marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
+    content: |
+      {% for host in groups[microk8s_group_INTERNALNODES] %}
+      {{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_hostname }}
+      {% endfor %}
+    when: "groups[microk8s_group_INTERNALNODES] is defined and groups[microk8s_group_INTERNALNODES]|length>0"
+
 - name: Enumerate all cluster HA hosts within the hosts file
   become: yes
   blockinfile:
@@ -9,6 +22,7 @@
       {% for host in groups[microk8s_group_HA] %}
       {{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_hostname }}
       {% endfor %}
+    when: "groups[microk8s_group_INTERNALNODES] is not defined or groups[microk8s_group_INTERNALNODES]|length == 0"
 
 - name: Enumerate all cluster worker hosts within the hosts file
   become: yes
@@ -19,11 +33,13 @@
       {% for host in groups[microk8s_group_WORKERS] %}
       {{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_hostname }}
       {% endfor %}
-  when: add_workers_to_hostfile
+  when:
+    - add_workers_to_hostfile
+    - groups[microk8s_group_INTERNALNODES] is not defined or groups[microk8s_group_INTERNALNODES]|length == 0
 
 - name: Find the designated host
   set_fact:
-    designated_host: '{{ (groups[microk8s_group_HA]|sort)[0] }}'
+    designated_host: '{{ (groups[microk8s_group_INTERNALNODES]|sort)[0] }}'
 
 - block:
   - name: Waiting for microk8s to be ready on microk8s host master
@@ -61,8 +77,36 @@
   become: yes
   when:
     - inventory_hostname != designated_host
-    - inventory_hostname in groups[microk8s_group_HA]
+    - inventory_hostname in groups[microk8s_group_INTERNALNODES]
 
 - name: configure cluster addons
   include_tasks: addons.yml
   when: inventory_hostname == designated_host
+
+- name: add upstream NFS CSI driver
+  become: yes
+  shell: "microk8s helm3 repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3
+
+- name: update helm repositories
+  become: yes
+  shell: "microk8s helm3 repo update"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3
+
+- name: install the Helm chart under the kube-system namespace
+  become: yes
+  shell: "microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3
+
+- name: wait for the CSI controller and node pods to come up
+  become: yes
+  shell: microk8s kubectl wait pod --selector app.kubernetes.io/name=csi-driver-nfs --for condition=ready --namespace kube-system"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3

@@ -2,7 +2,7 @@
 ---
 - name: add user to group
   become: yes
-  command: "usermod -a -G microk8s {{ user }}"
+  command: "usermod -aG microk8s {{ user }}"
   changed_when: true
   with_items: '{{ users }}'
   loop_control:
