@@ -2,7 +2,6 @@
 
 - name: microk8s installation
   include_tasks: install-microk8s.yml
-  when: "node_hostname in groups[microk8s_group_EXTERNALNODES]"
 
 - name: configure NFS server
   include_tasks: configure-NFS.yml
