@@ -7,13 +7,6 @@
   tags:
     -nfs
 
-- name: install nfs server
-  action: yum pkg=nfs-utils state=present
-  become: yes
-  when: is_centos
-  tags:
-    - nfs
-
 - name: install nfs client
   action: apt pkg=nfs-common state=present
   become: yes
@@ -21,27 +14,7 @@
   tags:
     -nfs
 
-# CentOS-specific actions
-- name: install nfs client
-  action: yum pkg=nfs-utils state=present
-  become: yes
-  when: is_centos
-  tags:
-    -nfs
-
-# CentOS does not start needed services after installation
-- name: ensure nfs service is running (CentOS)
-  action: service name={{item}} state=started
-  become: yes
-  when: is_centos
-  tags:
-    - nfs
-  with_items:
-    - rpcbind
-    - nfslock
-    - nfs
-
-- name: ensure nfs service is running (Ubuntu)
+- name: ensure nfs service is running
   action: service name={{item}} state=started
   when: is_debian_or_ubuntu
   tags:

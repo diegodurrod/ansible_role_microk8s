@@ -2,23 +2,6 @@
 
 - name: Install microk8s in external hosts
   block:
-  # ToDo: apply configuration
-  - name: Make sure snapd is installed
-    package:
-      name:
-        - snapd
-      state: latest
-    become: yes
-    when: is_archlinux
-
-  - name: Make sure snapd is installed
-    pacman:
-      name:
-        - snapd
-      state: present
-    become: yes
-    when: is_archlinux
-
   - name: Check if is raspberry
     shell: "uname -r"
     register: uname
