@@ -11,7 +11,7 @@
         {{ host.ansible_host }} {{ host.name }}
         {% endfor %}
   become: yes
-  when: "groups[microk8s_group_INTERNALNODES] is defined and groups[microk8s_group_INTERNALNODES]|length>0"
+  when: "microk8s_group_INTERNALNODES is defined and microk8s_group_INTERNALNODES]"
 
 - block:
   - name: Insert/update all cluster HA hosts within the hosts file
@@ -25,7 +25,7 @@
         {{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_hostname }}
         {% endfor %}
   become: yes
-  when: "groups[microk8s_group_INTERNALNODES] is not defined or groups[microk8s_group_INTERNALNODES]|length == 0"
+  when: "microk8s_group_INTERNALNODES is not defined or microk8s_group_INTERNALNODES|length == 0"
 
 - block:
   - name: Insert/update all cluster worker hosts within the hosts file
@@ -47,7 +47,7 @@
 - name: Find the designated host
   set_fact:
     designated_host: '{{ (groups[microk8s_group_EXTERNALNODES]|sort)[0] }}'
-    designated_internal_host: '{{ (groups[microk8s_group_INTERNALNODES]|sort)[0] }}'
+    designated_internal_host: '{{ microk8s_group_INTERNALNODES|sort)[0] }}'
 
 - block:
   - name: Waiting for microk8s to be ready on microk8s host master
