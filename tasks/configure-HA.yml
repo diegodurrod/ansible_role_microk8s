@@ -5,7 +5,7 @@
     ansible.builtin.blockinfile:
       path: /etc/hosts
       backup: yes
-      marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
+      marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Internal Hosts"
       content: |
         {% for host in microk8s_group_INTERNALNODES %}
         {{ host.ansible_host }} {{ host.name }}
@@ -35,8 +35,8 @@
       backup: yes
       marker: "# {mark} ANSIBLE MANAGED: microk8s WORKER Cluster Hosts"
       content: |
-        {% for host in groups[microk8s_group_WORKERS] %}
-        {{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_hostname }}
+        {% for host in microk8s_group_WORKERS %}
+        {{ host.ansible_host }} {{ host.name }}
         {% endfor %}
   become: yes
   when:
