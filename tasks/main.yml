@@ -2,7 +2,7 @@
 
 - name: microk8s installation
   include_tasks: install-microk8s.yml
-  when: not nfs-external
+  when: not microk8s_group_NFS
 
 - name: configure NFS server
   include_tasks: configure-NFS.yml
