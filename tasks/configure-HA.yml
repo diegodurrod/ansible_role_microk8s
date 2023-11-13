@@ -11,7 +11,8 @@
         {{ host.ansible_host }} {{ host.name }}
         {% endfor %}
   become: yes
-  when: "groups[microk8s_group_INTERNALNODES] is defined and groups[microk8s_group_INTERNALNODES]|length>0"
+  with_dict: mysql_additional_users | default({})
+  when: "microk8s_group_INTERNALNODES is defined"
 
 - block:
   - name: Insert/update all cluster HA hosts within the hosts file
@@ -47,7 +48,7 @@
 - name: Find the designated host
   set_fact:
     designated_host: '{{ (groups[microk8s_group_EXTERNALNODES]|sort)[0] }}'
-    designated_internal_host: '{{ (groups[microk8s_group_INTERNALNODES]|sort)[0] }}'
+    designated_internal_host: '{{ microk8s_group_INTERNALNODES|sort)[0] }}'
 
 - block:
   - name: Waiting for microk8s to be ready on microk8s host master
