@@ -33,3 +33,31 @@
     - item.status == 'enabled'
     - item.name in microk8s_plugins
     - not microk8s_plugins[item.name]
+
+- name: add upstream NFS CSI driver
+  become: yes
+  shell: "microk8s helm3 repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3
+
+- name: update helm repositories
+  become: yes
+  shell: "microk8s helm3 repo update"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3
+
+- name: install the Helm chart under the kube-system namespace
+  become: yes
+  shell: "microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet"
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3
+
+- name: wait for the CSI controller and node pods to come up
+  become: yes
+  shell: microk8s kubectl wait pod --selector app.kubernetes.io/name=csi-driver-nfs --for condition=ready --namespace kube-system
+  args:
+    executable: /bin/bash
+  when: microk8s_plugins.helm3

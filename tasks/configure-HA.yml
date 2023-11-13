@@ -1,7 +1,4 @@
 ---
-
-# when: "groups[microk8s_group_WORKERS] is defined and groups[microk8s_group_WORKERS]|length>0"
-#microk8s_group_INTERNALNODES
 - name: Enumerate all cluster HA hosts within the hosts file if internal nodes are defined
   become: yes
   blockinfile:
@@ -39,7 +36,8 @@
 
 - name: Find the designated host
   set_fact:
-    designated_host: '{{ (groups[microk8s_group_INTERNALNODES]|sort)[0] }}'
+    designated_host: '{{ (groups[microk8s_group_EXTERNALNODES]|sort)[0] }}'
+    designated_internal_host: '{{ (groups[microk8s_group_INTERNALNODES]|sort)[0] }}'
 
 - block:
   - name: Waiting for microk8s to be ready on microk8s host master
@@ -68,7 +66,7 @@
 
   - name: Set the microk8s join command on the microk8s node
     command: "{{ microk8s_join_command.stdout }}"
-    when: microk8s_cluster_node.stdout.find(inventory_hostname) == -1
+    when: microk8s_cluster_node.stdout.find(designated_internal_host) == -1
     register: join_command_output
     failed_when:
       - "'already known to dqlite' not in join_command_output.stdout"
@@ -77,36 +75,8 @@
   become: yes
   when:
     - inventory_hostname != designated_host
-    - inventory_hostname in groups[microk8s_group_INTERNALNODES]
+    - inventory_hostname in groups[microk8s_group_EXTERNALNODES]
 
 - name: configure cluster addons
   include_tasks: addons.yml
   when: inventory_hostname == designated_host
-
-- name: add upstream NFS CSI driver
-  become: yes
-  shell: "microk8s helm3 repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"
-  args:
-    executable: /bin/bash
-  when: microk8s_plugins.helm3
-
-- name: update helm repositories
-  become: yes
-  shell: "microk8s helm3 repo update"
-  args:
-    executable: /bin/bash
-  when: microk8s_plugins.helm3
-
-- name: install the Helm chart under the kube-system namespace
-  become: yes
-  shell: "microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet"
-  args:
-    executable: /bin/bash
-  when: microk8s_plugins.helm3
-
-- name: wait for the CSI controller and node pods to come up
-  become: yes
-  shell: microk8s kubectl wait pod --selector app.kubernetes.io/name=csi-driver-nfs --for condition=ready --namespace kube-system"
-  args:
-    executable: /bin/bash
-  when: microk8s_plugins.helm3
