@@ -1,4 +1,8 @@
 ---
+- name: tasks for groups[microk8s_group_INTERNALNODES]
+  ansible.builtin.debug:
+    msg: "Server: {{ groups[microk8s_group_INTERNALNODES] }}"
+
 - name: Enumerate all cluster HA hosts within the hosts file if internal nodes are defined
   become: yes
   blockinfile:
