@@ -10,7 +10,7 @@
     marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
     content: |
       {% for host in groups[microk8s_group_INTERNALNODES] %}
-      {{ host['ansible_host'] }} {{ host['name'] }}
+      {{ host.ansible_host }} {{ host.name }}
       {% endfor %}
     when: "groups[microk8s_group_INTERNALNODES] is defined and groups[microk8s_group_INTERNALNODES]|length>0"
 
