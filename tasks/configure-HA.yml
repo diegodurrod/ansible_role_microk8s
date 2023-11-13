@@ -41,7 +41,7 @@
   become: yes
   when:
     - add_workers_to_hostfile
-    - groups[microk8s_group_INTERNALNODES] is not defined or groups[microk8s_group_INTERNALNODES]|length == 0
+    - microk8s_group_INTERNALNODES is not defined or microk8s_group_INTERNALNODES|length == 0
 
 
 - name: Find the designated host
