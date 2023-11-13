@@ -1,19 +1,23 @@
 ---
-- name: Enumerate all cluster HA hosts within the hosts file if internal nodes are defined
+- block:
+  - name: Insert/update all cluster HA hosts within the hosts file if internal nodes are defined
+    become: yes
+    ansible.builtin.blockinfile:
+      path: /etc/hosts
+      backup: yes
+      marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
+      content: |
+        {% for host in microk8s_group_INTERNALNODES %}
+        {{ host.ansible_host }} {{ host.name }}
+        {% endfor %}
   become: yes
-  ansible.builtin.blockinfile:
-    dest: /etc/hosts
-    marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
-    content: |
-      {% for host in microk8s_group_INTERNALNODES %}
-      {{ host.ansible_host }} {{ host.name }}
-      {% endfor %}
-    when: "groups[microk8s_group_INTERNALNODES] is defined and groups[microk8s_group_INTERNALNODES]|length>0"
+  when: "groups[microk8s_group_INTERNALNODES] is defined and groups[microk8s_group_INTERNALNODES]|length>0"
 
-- name: Enumerate all cluster HA hosts within the hosts file
+- name: Insert/update all cluster HA hosts within the hosts file
   become: yes
   ansible.builtin.blockinfile:
-    dest: /etc/hosts
+    path: /etc/hosts
+    backup: yes
     marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
     content: |
       {% for host in groups[microk8s_group_HA] %}
@@ -21,10 +25,11 @@
       {% endfor %}
     when: "groups[microk8s_group_INTERNALNODES] is not defined or groups[microk8s_group_INTERNALNODES]|length == 0"
 
-- name: Enumerate all cluster worker hosts within the hosts file
+- name: Insert/update all cluster worker hosts within the hosts file
   become: yes
   ansible.builtin.blockinfile:
-    dest: /etc/hosts
+    path: /etc/hosts
+    backup: yes
     marker: "# {mark} ANSIBLE MANAGED: microk8s WORKER Cluster Hosts"
     content: |
       {% for host in groups[microk8s_group_WORKERS] %}
