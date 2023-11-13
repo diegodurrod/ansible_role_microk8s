@@ -1,7 +1,7 @@
 ---
 - name: Enumerate all cluster HA hosts within the hosts file if internal nodes are defined
   become: yes
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/hosts
     marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
     content: |
@@ -12,7 +12,7 @@
 
 - name: Enumerate all cluster HA hosts within the hosts file
   become: yes
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/hosts
     marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
     content: |
@@ -23,7 +23,7 @@
 
 - name: Enumerate all cluster worker hosts within the hosts file
   become: yes
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/hosts
     marker: "# {mark} ANSIBLE MANAGED: microk8s WORKER Cluster Hosts"
     content: |
